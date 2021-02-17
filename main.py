@@ -5,10 +5,10 @@ import datetime as dt
 from sklearn.preprocessing import MinMaxScaler
 
 # Load Data
-company = 'APPL'
+company = 'IBM'
 start = dt.datetime(2015, 1, 1)
 end = dt.datetime(2021, 1, 1)
-data = web.DataReader(company, 'yahoo', start, end)
+data = web.DataReader(company, 'yahoo', start, end)  # .reset_index()
 
 # Prepare Data
 scaler = MinMaxScaler(feature_range=(0, 1))

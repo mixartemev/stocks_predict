@@ -5,3 +5,5 @@ pandas
 pandas_datareader
 sklearn
 scikit-learn
+tkcalendar
+mplfinance
