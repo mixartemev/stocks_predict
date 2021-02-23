@@ -10,7 +10,7 @@ from tensorflow.keras.layers import Dense, Dropout, LSTM
 
 # Load Data
 company = 'IBM'
-start = dt.datetime(2019, 1, 1)
+start = dt.datetime(2015, 1, 1)
 end = dt.datetime(2021, 1, 1)
 data = web.DataReader(company, 'yahoo', start, end)['Close']  # only "Close" column
 
@@ -50,7 +50,7 @@ test_end = dt.datetime.now()
 
 test_data = web.DataReader(company, 'yahoo', test_start, test_end)['Close']
 actual_prices = test_data.values
-total_dataset = pd.concat(data, test_data)
+total_dataset = pd.concat((data, test_data), axis=0)
 
 model_inputs = total_dataset[len(total_dataset) - len(test_data) - prediction_days:].values
 model_inputs = model_inputs.reshape(-1, 1)
