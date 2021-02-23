@@ -12,18 +12,20 @@ from tensorflow.keras.layers import Dense, Dropout, LSTM
 company = 'IBM'
 start = dt.datetime(2019, 1, 1)
 end = dt.datetime(2021, 1, 1)
-data = web.DataReader(company, 'yahoo', start, end)  # .reset_index()
+data = web.DataReader(company, 'yahoo', start, end)['Close']  # only "Close" column
 
 # Prepare Data
+data_val = data.values  # 1d row array from date-keyed column
+reshaped_data = data_val.reshape(-1, 1)  # row to auto-inc column
 scaler = MinMaxScaler(feature_range=(0, 1))
-scaled_data = scaler.fit_transform(data['Close'].values.reshape(-1, 1))
+scaled_data = scaler.fit_transform(reshaped_data)
 prediction_days = 60
 x_train = []
 y_train = []
 
 for x in range(prediction_days, len(scaled_data)):
-    x_train.append(scaled_data[x-prediction_days:x, 0])
-    y_train.append(scaled_data[x, 0])
+    x_train.append(scaled_data[x-prediction_days:x, 0])  # input
+    y_train.append(scaled_data[x, 0])  # output
 
 x_train, y_train = np.array(x_train), np.array(y_train)
 x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
@@ -46,9 +48,9 @@ model.fit(x_train, y_train, epochs=25, batch_size=32)
 test_start = dt.datetime(2021, 1, 1)
 test_end = dt.datetime.now()
 
-test_data = web.DataReader(company, 'yahoo', test_start, test_end)
-actual_prices = test_data['Close'].values
-total_dataset = pd.concat(data['Close'], test_data['Close'])
+test_data = web.DataReader(company, 'yahoo', test_start, test_end)['Close']
+actual_prices = test_data.values
+total_dataset = pd.concat(data, test_data)
 
 model_inputs = total_dataset[len(total_dataset) - len(test_data) - prediction_days:].values
 model_inputs = model_inputs.reshape(-1, 1)
@@ -74,4 +76,3 @@ plt.xlabel('Time')
 plt.xlabel('Price')
 plt.legend()
 plt.show()
-
