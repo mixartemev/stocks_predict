@@ -9,9 +9,9 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM
 
 # Load Data
-company = 'IBM'
-start = dt.datetime(2015, 1, 1)
-end = dt.datetime(2021, 1, 1)
+company = 'AAPL'
+start = dt.datetime(2021, 1, 15)
+end = dt.datetime(2021, 2, 10)
 data = web.DataReader(company, 'yahoo', start, end)['Close']  # only "Close" column
 
 # Prepare Data
@@ -19,7 +19,7 @@ data_val = data.values  # 1d row array from date-keyed column
 reshaped_data = data_val.reshape(-1, 1)  # row to auto-inc column
 scaler = MinMaxScaler(feature_range=(0, 1))
 scaled_data = scaler.fit_transform(reshaped_data)
-prediction_days = 60
+prediction_days = 5
 x_train = []
 y_train = []
 
@@ -42,10 +42,10 @@ model.add(Dropout(0.2))
 model.add(Dense(units=1))  # Prediction of next close price
 
 model.compile(optimizer='adam', loss='mean_squared_error')
-model.fit(x_train, y_train, epochs=25, batch_size=32)
+model.fit(x_train, y_train, epochs=5, batch_size=32)
 
 # Test the model accuracy on existed data
-test_start = dt.datetime(2021, 1, 1)
+test_start = dt.datetime(2021, 2, 11)
 test_end = dt.datetime.now()
 
 test_data = web.DataReader(company, 'yahoo', test_start, test_end)['Close']
@@ -76,3 +76,12 @@ plt.xlabel('Time')
 plt.xlabel('Price')
 plt.legend()
 plt.show()
+
+# Predict tomorrow
+real_data = [model_inputs[len(model_inputs) - prediction_days: len(model_inputs), 0]]
+real_data = np.array(real_data)
+real_data = np.reshape(real_data, (real_data.shape[0], real_data.shape[1], 1))
+
+prediction = model.predict(real_data)
+prediction = scaler.inverse_transform(prediction)
+print(f"Tomorrow {company} price: {prediction[0][0]}")
