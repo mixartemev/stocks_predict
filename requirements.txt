@@ -1,7 +1,6 @@
 numpy
 tensorflow
 matplotlib
-pandas
 pandas_datareader
 sklearn
 scikit-learn
