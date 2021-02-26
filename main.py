@@ -12,7 +12,7 @@ from tensorflow.keras.layers import Dense, Dropout, LSTM
 company = 'TSLA'
 start_train = dt.date(2015, 1, 1)
 end = dt.date.today()
-pred_days = 20
+pred_days = 50
 test_days = 100
 
 # Load Data
@@ -32,8 +32,8 @@ x_matrix, y_row = np.array(x_matrix), np.array(y_row)
 x_matrix = x_matrix.reshape((x_matrix.shape[0], x_matrix.shape[1], 1))
 
 # Build Model
-if exists('mdl-20.h5'):
-    model = load_model('mdl-20.h5')
+if exists('mdl.h5'):
+    model = load_model('mdl.h5')
 else:
     model = Sequential()
     model.add(LSTM(units=50, return_sequences=True, input_shape=(pred_days, 1)))
@@ -44,7 +44,7 @@ else:
     model.add(Dropout(0.2))
     model.add(Dense(units=1))  # Prediction of next close price
     model.compile(optimizer='adam', loss='mean_squared_error')
-    model.fit(x_matrix[:-test_days], y_row[:-test_days], epochs=25, batch_size=32)
+    model.fit(x_matrix[:-test_days], y_row[:-test_days], epochs=50, batch_size=32)
     model.save('mdl.h5')
 
 # Make predictions on test data
@@ -62,12 +62,22 @@ prediction = scaler.inverse_transform(prediction)[0][0]
 print(f"Tomorrow {company} price: {prediction}")
 
 # Plot predicted and actual prices
+_fig, ax = plt.subplots()
+# s = plt.style.use('fast')
+# dif_color = np.where(dif < 0, 'b', 'r')
+plt.bar(range(dif.size), dif[:, 0], label='Loss')
+plt.legend()
+
+ax2 = ax.twinx()
 plt.plot(prices_col[-test_days:], color='black', label=f'Actual {company} price')
 plt.plot(predicted_prices_col, color='green', label=f'Predicted {company} price')
-dif_color = np.where(dif < 0, 'b', 'r')
-plt.bar(range(dif.size), dif[:, 0], label='Loss')
-plt.title(f'Tomorrow {company} Price: ${prediction:.2f}')
+
+plt.title(f'Tomorrow {company} Price: ${prediction:.2f}'
+          f'\nPredDays:{pred_days}, StartYear:{2015}, PredDays:{pred_days}, Epochs {50}')
 plt.xlabel('Days')
 plt.ylabel('Price')
 plt.legend()
 plt.show()
+
+# ['Solarize_Light2', '_classic_test_patch', 'bmh', 'classic', 'dark_background', 'fast', 'fivethirtyeight', 'ggplot', 'grayscale', 'seaborn', 'seaborn-bright', 'seaborn-colorblind', 'seaborn-dark', 'seaborn-dark-palette', 'seaborn-darkgrid', 'seaborn-deep', 'seaborn-muted', 'seaborn-notebook', 'seaborn-paper', 'seaborn-pastel', 'seaborn-poster', 'seaborn-talk', 'seaborn-ticks', 'seaborn-white', 'seaborn-whitegrid', 'tableau-colorblind10']
+# ['coolwarm', 'bwr', 'seismic']
