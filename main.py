@@ -29,11 +29,6 @@ for i in range(pred_days, len(data_col)):
 
 x_matrix, y_row = np.array(x_matrix), np.array(y_row)
 x_matrix = x_matrix.reshape((x_matrix.shape[0], x_matrix.shape[1], 1))
-# tmp only for debug
-x_train_matrix = x_matrix[:-test_days]
-x_test_matrix = x_matrix[-test_days:]
-y_train_row = y_row[:-test_days]
-y_test_row = y_row[-test_days:]
 
 # Build Model
 model = Sequential()
@@ -47,14 +42,14 @@ model.add(Dropout(0.2))
 model.add(Dense(units=1))  # Prediction of next close price
 
 model.compile(optimizer='adam', loss='mean_squared_error')
-model.fit(x_train_matrix, y_train_row, epochs=25, batch_size=32)
+model.fit(x_matrix[:-test_days], y_row[:-test_days], epochs=25, batch_size=32)
 
 # Make predictions on test data
-predicted_data_col = model.predict(x_test_matrix)
+predicted_data_col = model.predict(x_matrix[-test_days:])
 predicted_prices_col = scaler.inverse_transform(predicted_data_col)
 
 # Predict tomorrow
-real_data = np.array([y_test_row[-pred_days:]])
+real_data = np.array([y_row[-pred_days:]])
 real_data = real_data.reshape((1, pred_days, 1))
 
 prediction = model.predict(real_data)
@@ -65,7 +60,7 @@ print(f"Tomorrow {company} price: {prediction}")
 plt.plot(prices_col[-test_days:], color='black', label=f'Actual {company} price')
 plt.plot(predicted_prices_col, color='green', label=f'Predicted {company} price')
 plt.title(f'Tomorrow {company} Price: ${prediction:.2f}')
-plt.xlabel('Time')
-plt.xlabel('Price')
+plt.xlabel('Days')
+plt.ylabel('Price')
 plt.legend()
 plt.show()
