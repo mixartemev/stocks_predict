@@ -12,16 +12,16 @@ from tensorflow.keras.layers import Dense, Dropout, LSTM
 
 # Init vars
 company = 'AAPL'
-start_train = dt.date(2013, 1, 1)
+start_year = 2014
 end = dt.date.today()
-pred_days = 50
-test_days = 100
-epochs = 50
+pred_days = 45
+test_days = 150
+epochs = 30
 lstm_units = 50
-model_name = f'models/{company}/pd{pred_days}-e{epochs}-lu{lstm_units}.h5'
+model_name = f'models/{company}/pd{pred_days}-e{epochs}-lu{lstm_units}-{start_year}.h5'
 
 # Load Data
-prices = web.DataReader(company, 'yahoo', start_train, end)['Close']
+prices = web.DataReader(company, 'yahoo', dt.date(start_year, 1, 1), end)['Close']
 prices_col = prices.values.reshape(-1, 1)
 nd: datetime64 = np.datetime64('2020', 'D')
 
@@ -51,7 +51,7 @@ else:
     model.add(Dropout(0.2))
     model.add(Dense(units=1))  # Prediction of next close price
     model.compile(optimizer='adam', loss='mean_squared_error')
-    model.fit(x_matrix[:-test_days], y_row[:-test_days], epochs=epochs, batch_size=32)
+    model.fit(x_matrix[:-test_days], y_row[:-test_days], epochs=epochs, batch_size=25)
     model.save(model_name)
 
 # Make predictions on test data
@@ -72,7 +72,7 @@ print(f"Tomorrow {company} price: {prediction}")
 
 # Plot predicted and actual prices
 fig, ax1 = plt.subplots()
-fig.suptitle(f'PredDays:{pred_days}, Epochs:{50}, StartYear:{2015}', fontsize=10)
+fig.suptitle(f'PredDays:{pred_days}, Epochs:{50}, StartYear:{start_year}', fontsize=10)
 plt.title(f'Tomorrow {company} Price: ${prediction:.2f}')
 plt.xlabel('Days')
 dates = [np.datetime64(x, 'D') for x in prices.index.values[-test_days:]]
